@@ -7,7 +7,7 @@
 
 import UIKit
 
-public struct Tracker {
+struct Tracker {
     let id: UUID
     let title: String
     let color: UIColor
@@ -15,7 +15,7 @@ public struct Tracker {
     let schedule: Set<WeekDay>
 }
 
-enum WeekDay: Hashable {
+enum WeekDay: CaseIterable, Hashable {
     case monday
     case tuesday
     case wednesday
@@ -23,16 +23,6 @@ enum WeekDay: Hashable {
     case friday
     case saturday
     case sunday
-
-    static let orderedDays: [WeekDay] = [
-        .monday,
-        .tuesday,
-        .wednesday,
-        .thursday,
-        .friday,
-        .saturday,
-        .sunday,
-    ]
 
     init?(date: Date, calendar: Calendar = .current) {
         switch calendar.component(.weekday, from: date) {

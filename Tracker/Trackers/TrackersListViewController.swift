@@ -218,14 +218,13 @@ final class TrackersListViewController: UIViewController {
     @objc
     private func didTapAdd() {
         let addTrackerViewController = AddTrackerViewController()
-        
+
         addTrackerViewController.delegate = self
 
-        
         let navigationController = UINavigationController(
             rootViewController: addTrackerViewController
         )
-        
+
         present(navigationController, animated: true)
     }
 

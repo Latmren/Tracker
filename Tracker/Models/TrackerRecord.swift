@@ -7,7 +7,7 @@
 
 import Foundation
 
-public struct TrackerRecord {
+struct TrackerRecord {
     let id: UUID
     let date: Date
 }

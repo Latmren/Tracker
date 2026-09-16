@@ -50,8 +50,9 @@ final class ScheduleViewController: UIViewController {
         super.init(nibName: nil, bundle: nil)
     }
 
+    @available(*, unavailable)
     required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
+        nil
     }
 
     override func viewDidLoad() {
@@ -62,7 +63,7 @@ final class ScheduleViewController: UIViewController {
 
         tableView.dataSource = self
         tableView.delegate = self
-        
+
         view.addSubview(tableView)
         view.addSubview(doneButton)
 
@@ -117,7 +118,7 @@ final class ScheduleViewController: UIViewController {
 
     @objc
     private func switchChanged(_ sender: UISwitch) {
-        let day = WeekDay.orderedDays[sender.tag]
+        let day = WeekDay.allCases[sender.tag]
 
         if sender.isOn {
             selectedDays.insert(day)
@@ -151,12 +152,12 @@ extension ScheduleViewController: UITableViewDataSource, UITableViewDelegate {
     ) -> CGFloat {
         75
     }
-    
+
     func tableView(
         _ tableView: UITableView,
         numberOfRowsInSection section: Int
     ) -> Int {
-        WeekDay.orderedDays.count
+        WeekDay.allCases.count
     }
 
     func tableView(
@@ -164,7 +165,7 @@ extension ScheduleViewController: UITableViewDataSource, UITableViewDelegate {
         cellForRowAt indexPath: IndexPath
     ) -> UITableViewCell {
 
-        let day = WeekDay.orderedDays[indexPath.row]
+        let day = WeekDay.allCases[indexPath.row]
 
         let cell = UITableViewCell(
             style: .default,

@@ -17,7 +17,12 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
     weak var delegate: TrackerCollectionViewCellDelegate?
 
     static let reuseIdentifier = "TrackerCollectionViewCell"
-    
+
+    private enum SystemImageName: String {
+        case plus
+        case checkmark
+    }
+
     // MARK: - UI Elements
 
     private let cardView: UIView = {
@@ -72,7 +77,7 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
         let button = UIButton()
 
         button.setImage(
-            UIImage(systemName: "plus"),
+            UIImage(systemName: SystemImageName.plus.rawValue),
             for: .normal
         )
         button.tintColor = .white
@@ -99,8 +104,9 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
 
     }
 
+    @available(*, unavailable)
     required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
+        nil
     }
 
     private func setupView() {
@@ -200,10 +206,13 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
 
         daysLabel.text = daysFormatter.string(from: components)
 
-        let imageName = isCompleted ? "checkmark" : "plus"
+        let imageName: SystemImageName =
+            isCompleted
+            ? .checkmark
+            : .plus
 
         completeButton.setImage(
-            UIImage(systemName: imageName),
+            UIImage(systemName: imageName.rawValue),
             for: .normal
         )
     }
