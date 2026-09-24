@@ -151,6 +151,7 @@ class NewTrackerViewController: UIViewController {
         view.backgroundColor = .ypWhite
 
         title = screenTitle
+        navigationItem.hidesBackButton = true
 
         view.addSubview(tableView)
 
@@ -391,6 +392,19 @@ extension NewTrackerViewController: UITableViewDataSource, UITableViewDelegate {
             )
 
             cell.backgroundColor = .ypBackgroundDay
+            
+            cell.separatorInset = UIEdgeInsets(
+                top: 0,
+                left: 16,
+                bottom: 0,
+                right: 16
+            )
+            
+            cell.textLabel?.font = .systemFont(ofSize: 17)
+            cell.textLabel?.textColor = .ypBlackDay
+
+            cell.detailTextLabel?.font = .systemFont(ofSize: 17)
+            cell.detailTextLabel?.textColor = .ypGray
 
             switch indexPath.row {
             case 0:

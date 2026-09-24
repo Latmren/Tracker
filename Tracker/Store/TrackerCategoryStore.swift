@@ -13,16 +13,20 @@ final class TrackerCategoryStore: NSObject {
     weak var delegate: StoreDelegate?
 
     var categories: [TrackerCategory] {
-        guard
-            let objects = fetchedResultsController.fetchedObjects,
-            let categories = try? objects.map({
-                try category(from: $0)
-            })
-        else {
+        guard let objects = fetchedResultsController.fetchedObjects else {
             return []
         }
 
-        return categories
+        return objects.compactMap { object in
+            do {
+                return try category(from: object)
+            } catch {
+                assertionFailure(
+                    "Не удалось преобразовать категорию: \(error)"
+                )
+                return nil
+            }
+        }
     }
 
     private lazy var fetchedResultsController:
@@ -65,8 +69,15 @@ final class TrackerCategoryStore: NSObject {
         let trackerObjects =
             categoryCoreData.tracker?.allObjects as? [TrackerCoreData] ?? []
 
-        let trackers = try trackerObjects.map {
-            try mapper.tracker(from: $0)
+        let trackers = trackerObjects.compactMap { trackerCoreData in
+            do {
+                return try mapper.tracker(from: trackerCoreData)
+            } catch {
+                assertionFailure(
+                    "Не удалось преобразовать трекер: \(error)"
+                )
+                return nil
+            }
         }
 
         return TrackerCategory(

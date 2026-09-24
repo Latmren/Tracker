@@ -18,6 +18,10 @@ final class TrackersListViewController: UIViewController {
     private var trackerStore: TrackerStore?
     private var categoryStore: TrackerCategoryStore?
     private var recordStore: TrackerRecordStore?
+    
+    private enum SystemImageName: String {
+        case plus
+    }
 
     // MARK: - UI Elements
 
@@ -153,12 +157,26 @@ final class TrackersListViewController: UIViewController {
         searchController.searchBar.placeholder = "Поиск"
         searchController.obscuresBackgroundDuringPresentation = false
 
-        navigationItem.leftBarButtonItem = UIBarButtonItem(
-            barButtonSystemItem: .add,
+        let configuration = UIImage.SymbolConfiguration(
+            pointSize: 18,
+            weight: .bold
+        )
+
+        let addImage = UIImage(
+            systemName: SystemImageName.plus.rawValue,
+            withConfiguration: configuration
+        )
+
+        let addButton = UIBarButtonItem(
+            image: addImage,
+            style: .plain,
             target: self,
             action: #selector(didTapAdd)
         )
 
+        addButton.tintColor = .ypBlackDay
+        navigationItem.leftBarButtonItem = addButton
+        
         navigationItem.rightBarButtonItem = UIBarButtonItem(
             customView: datePicker
         )

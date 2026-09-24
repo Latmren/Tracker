@@ -16,9 +16,8 @@ class CollectionTableViewCell: UITableViewCell {
 
     //MARK: - Properties
 
-    private let numberOfItems = 18
     private let type: CollectionType
-    
+
     var onEmojiSelected: ((String) -> Void)?
     var onColorSelected: ((UIColor) -> Void)?
 
@@ -49,7 +48,7 @@ class CollectionTableViewCell: UITableViewCell {
         super.init(style: .default, reuseIdentifier: reuseIdentifier)
 
         selectionStyle = .none
-        
+
         setupCollectionView()
     }
 
@@ -120,7 +119,7 @@ extension CollectionTableViewCell: UICollectionViewDataSource,
                 return UICollectionViewCell()
             }
             cell.layer.cornerRadius = 16
-            cell.titleLabel.text = emojis[indexPath.item]
+            cell.configure(with: emojis[indexPath.item])
 
             return cell
 
@@ -135,10 +134,9 @@ extension CollectionTableViewCell: UICollectionViewDataSource,
             }
 
             cell.layer.cornerRadius = 11
-            cell.colorView.backgroundColor = colors[indexPath.item]
+            cell.configure(with: colors[indexPath.item])
             cell.layer.borderColor =
                 colors[indexPath.item].withAlphaComponent(0.3).cgColor
-            cell.layer.borderWidth = 0
 
             return cell
         }
@@ -150,39 +148,9 @@ extension CollectionTableViewCell: UICollectionViewDataSource,
     ) {
         switch type {
         case .emoji:
-            let cell =
-                collectionView.cellForItem(at: indexPath)
-                as? EmojiCollectionViewCell
-            cell?.backgroundColor = UIColor(resource: .ypLightGray)
-            
             onEmojiSelected?(emojis[indexPath.item])
-
         case .color:
-            let cell =
-                collectionView.cellForItem(at: indexPath)
-                as? ColorCollectionViewCell
-            cell?.layer.borderWidth = 3
-            
             onColorSelected?(colors[indexPath.item])
-        }
-    }
-
-    func collectionView(
-        _ collectionView: UICollectionView,
-        didDeselectItemAt indexPath: IndexPath
-    ) {
-        switch type {
-        case .emoji:
-            let cell =
-                collectionView.cellForItem(at: indexPath)
-                as? EmojiCollectionViewCell
-            cell?.backgroundColor = UIColor(resource: .ypWhite)
-
-        case .color:
-            let cell =
-                collectionView.cellForItem(at: indexPath)
-                as? ColorCollectionViewCell
-            cell?.layer.borderWidth = 0
         }
     }
 
@@ -190,7 +158,12 @@ extension CollectionTableViewCell: UICollectionViewDataSource,
         _ collectionView: UICollectionView,
         numberOfItemsInSection section: Int
     ) -> Int {
-        numberOfItems
+        switch type {
+        case .emoji:
+            return emojis.count
+        case .color:
+            return colors.count
+        }
     }
 
     func collectionView(
@@ -220,7 +193,7 @@ extension CollectionTableViewCell: UICollectionViewDataSource,
     ) -> CGFloat {
         0
     }
-    
+
     func collectionView(
         _ collectionView: UICollectionView,
         layout collectionViewLayout: UICollectionViewLayout,

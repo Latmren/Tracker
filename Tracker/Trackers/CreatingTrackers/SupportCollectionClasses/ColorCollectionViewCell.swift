@@ -9,16 +9,38 @@ import UIKit
 
 final class ColorCollectionViewCell: UICollectionViewCell {
 
-    let colorView: UIView = {
+    // MARK: - override Properties
+    
+    override var isSelected: Bool {
+        didSet {
+            layer.borderWidth = isSelected ? 3 : 0
+        }
+    }
+    
+    // MARK: - UI Elements
+    
+    private let colorView: UIView = {
         let view = UIView()
         view.layer.cornerRadius = 8
         view.translatesAutoresizingMaskIntoConstraints = false
         return view
     }()
+    
+    // MARK: - Initialization
 
     override init(frame: CGRect) {
         super.init(frame: frame)
-
+        setupUI()
+    }
+    
+    @available(*, unavailable)
+    required init?(coder: NSCoder) {
+        nil
+    }
+    
+    // MARK: - Setup
+    
+    private func setupUI() {
         contentView.addSubview(colorView)
 
         NSLayoutConstraint.activate([
@@ -32,9 +54,11 @@ final class ColorCollectionViewCell: UICollectionViewCell {
             ),
         ])
     }
-
-    @available(*, unavailable)
-    required init?(coder: NSCoder) {
-        nil
+    
+    // MARK: - Public Methods
+    
+    func configure(with color: UIColor) {
+        colorView.backgroundColor = color
     }
+    
 }

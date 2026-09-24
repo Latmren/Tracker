@@ -7,19 +7,41 @@
 
 import UIKit
 
-class EmojiCollectionViewCell: UICollectionViewCell {
+final class EmojiCollectionViewCell: UICollectionViewCell {
+    
+    // MARK: - override Properties
+    
+    override var isSelected: Bool {
+        didSet {
+            backgroundColor = isSelected ? .ypLightGray : .ypWhite
+        }
+    }
+    
+    // MARK: - UI Elements
 
-    let titleLabel: UILabel = {
+    private let titleLabel: UILabel = {
         let label = UILabel()
         label.font = .systemFont(ofSize: 32, weight: .bold)
         label.translatesAutoresizingMaskIntoConstraints = false
 
         return label
     }()
+    
+    // MARK: - Initialization
 
     override init(frame: CGRect) {
         super.init(frame: frame)
-
+        setupUI()
+    }
+    
+    @available(*, unavailable)
+    required init?(coder: NSCoder) {
+        nil
+    }
+    
+    // MARK: - Setup
+    
+    private func setupUI() {
         contentView.addSubview(titleLabel)
 
         NSLayoutConstraint.activate([
@@ -32,8 +54,12 @@ class EmojiCollectionViewCell: UICollectionViewCell {
         ])
     }
 
-    @available(*, unavailable)
-    required init?(coder: NSCoder) {
-        nil
+
+    
+    // MARK: - Public Methods
+
+    func configure(with emoji: String) {
+        titleLabel.text = emoji
     }
+
 }
