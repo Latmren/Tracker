@@ -15,11 +15,15 @@ protocol ScheduleViewControllerDelegate: AnyObject {
 }
 
 final class ScheduleViewController: UIViewController {
+    
+    // MARK: - Properties
 
     weak var delegate: ScheduleViewControllerDelegate?
 
     private var selectedDays: Set<WeekDay>
 
+    // MARK: - UI Elements:
+    
     private let tableView: UITableView = {
         let tableView = UITableView(
             frame: .zero,
@@ -44,6 +48,9 @@ final class ScheduleViewController: UIViewController {
         button.translatesAutoresizingMaskIntoConstraints = false
         return button
     }()
+    
+    // MARK: - Initialization
+    
 
     init(selectedDays: Set<WeekDay>) {
         self.selectedDays = selectedDays
@@ -54,12 +61,21 @@ final class ScheduleViewController: UIViewController {
     required init?(coder: NSCoder) {
         nil
     }
+    
+    // MARK: - LifeCycle
 
     override func viewDidLoad() {
         super.viewDidLoad()
-
+        setupUI()
+    }
+    
+    // MARK: - Setup
+    
+    private func setupUI() {
         title = "Расписание"
         view.backgroundColor = .ypWhite
+        
+        navigationItem.hidesBackButton = true
 
         tableView.dataSource = self
         tableView.delegate = self
@@ -106,6 +122,9 @@ final class ScheduleViewController: UIViewController {
         ])
     }
 
+    
+    // MARK: - Private functions
+    
     @objc
     private func didTapDone() {
         delegate?.scheduleViewController(
@@ -143,6 +162,8 @@ final class ScheduleViewController: UIViewController {
         return Array(symbols[1...]) + [symbols[0]]
     }
 }
+
+    // MARK: - UITableViewDataSource, UITableViewDelegate
 
 extension ScheduleViewController: UITableViewDataSource, UITableViewDelegate {
 

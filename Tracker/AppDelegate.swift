@@ -18,7 +18,10 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
         didFinishLaunchingWithOptions launchOptions:
             [UIApplication.LaunchOptionsKey: Any]?
     ) -> Bool {
-        true
+
+        DaysValueTransformer.register()
+
+        return true
     }
 
     // MARK: UISceneSession Lifecycle
@@ -35,7 +38,6 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
             sessionRole: connectingSceneSession.role
         )
     }
-
 
     // MARK: - Core Data stack
 
@@ -67,6 +69,20 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
         return container
     }()
 
+    func makeStores() throws -> (
+        tracker: TrackerStore,
+        category: TrackerCategoryStore,
+        record: TrackerRecordStore
+    ) {
+        let context = persistentContainer.viewContext
+
+        return (
+            try TrackerStore(context: context),
+            try TrackerCategoryStore(context: context),
+            try TrackerRecordStore(context: context)
+        )
+    }
+
     // MARK: - Core Data Saving support
 
     func saveContext() {
@@ -75,10 +91,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
             do {
                 try context.save()
             } catch {
-                // Replace this implementation with code to handle the error appropriately.
-                // fatalError() causes the application to generate a crash log and terminate. You should not use this function in a shipping application, although it may be useful during development.
-                let nserror = error as NSError
-                fatalError("Unresolved error \(nserror), \(nserror.userInfo)")
+                assertionFailure("Не удалось сохранить Core Data: \(error)")
             }
         }
     }

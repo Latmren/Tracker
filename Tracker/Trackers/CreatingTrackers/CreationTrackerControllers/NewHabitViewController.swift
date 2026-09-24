@@ -7,8 +7,6 @@
 
 import UIKit
 
-
-
 final class NewHabitViewController: NewTrackerViewController {
 
     init() {

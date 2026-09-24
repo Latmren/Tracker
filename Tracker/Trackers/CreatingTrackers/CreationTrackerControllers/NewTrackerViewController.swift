@@ -14,6 +14,13 @@ protocol TrackerCreationDelegate: AnyObject {
     )
 }
 
+private enum Section: Int, CaseIterable {
+    case name
+    case settings
+    case emoji
+    case color
+}
+
 class NewTrackerViewController: UIViewController {
 
     //MARK: - Properties
@@ -23,8 +30,13 @@ class NewTrackerViewController: UIViewController {
     private let screenTitle: String
     private let showsSchedule: Bool
 
+    private let sectionSpacing: CGFloat = 16
+    private let collectionHeaderHeight: CGFloat = 32
+
     private var isNameOverLimit = false
 
+    private var selectedEmoji: String?
+    private var selectedColor: UIColor?
     private var selectedCategory = "Важное"
     private var selectedSchedule: Set<WeekDay>
 
@@ -139,6 +151,7 @@ class NewTrackerViewController: UIViewController {
         view.backgroundColor = .ypWhite
 
         title = screenTitle
+        navigationItem.hidesBackButton = true
 
         view.addSubview(tableView)
 
@@ -220,7 +233,12 @@ class NewTrackerViewController: UIViewController {
 
         let isScheduleValid = !selectedSchedule.isEmpty
 
-        let canCreate = isNameValid && isScheduleValid
+        let isEmojiSelected = selectedEmoji != nil
+
+        let isColorSelected = selectedColor != nil
+
+        let canCreate =
+            isNameValid && isScheduleValid && isEmojiSelected && isColorSelected
 
         addButton.isEnabled = canCreate
         addButton.backgroundColor =
@@ -255,7 +273,9 @@ class NewTrackerViewController: UIViewController {
     @objc private func didTapAddButton() {
         guard
             let title = habitNameTextField.text,
-            !title.isEmpty
+            !title.isEmpty,
+            let selectedEmoji,
+            let selectedColor
         else {
             return
         }
@@ -263,8 +283,8 @@ class NewTrackerViewController: UIViewController {
         let tracker = Tracker(
             id: UUID(),
             title: title,
-            color: .colorSelection5,  // temporary mock
-            emoji: "🙂",  // temporary mock
+            color: selectedColor,
+            emoji: selectedEmoji,
             schedule: selectedSchedule
         )
 
@@ -283,19 +303,27 @@ extension NewTrackerViewController: UITableViewDataSource, UITableViewDelegate {
     func numberOfSections(
         in tableView: UITableView
     ) -> Int {
-        2
+        Section.allCases.count
     }
 
     func tableView(
         _ tableView: UITableView,
         numberOfRowsInSection section: Int
     ) -> Int {
-        switch section {
-        case 0: 1
 
-        case 1: showsSchedule ? 2 : 1
+        guard let tableSection = Section(rawValue: section) else {
+            return 0
+        }
 
-        default: 0
+        switch tableSection {
+        case .name: return 1
+
+        case .settings: return showsSchedule ? 2 : 1
+
+        case .emoji: return 1
+
+        case .color: return 1
+
         }
     }
 
@@ -303,7 +331,17 @@ extension NewTrackerViewController: UITableViewDataSource, UITableViewDelegate {
         _ tableView: UITableView,
         heightForRowAt indexPath: IndexPath
     ) -> CGFloat {
-        75
+        guard let section = Section(rawValue: indexPath.section) else {
+            return 75
+        }
+
+        switch section {
+        case .emoji, .color:
+            return 200
+
+        case .name, .settings:
+            return 75
+        }
     }
 
     func tableView(
@@ -311,7 +349,14 @@ extension NewTrackerViewController: UITableViewDataSource, UITableViewDelegate {
         cellForRowAt indexPath: IndexPath
     ) -> UITableViewCell {
 
-        if indexPath.section == 0 {
+        guard let tableSection = Section(rawValue: indexPath.section) else {
+            assertionFailure("Unknown table section")
+            return UITableViewCell()
+        }
+
+        switch tableSection {
+        case .name:
+
             let cell = UITableViewCell(
                 style: .default,
                 reuseIdentifier: nil
@@ -338,44 +383,86 @@ extension NewTrackerViewController: UITableViewDataSource, UITableViewDelegate {
             ])
 
             return cell
-        }
 
-        let cell = UITableViewCell(
-            style: .subtitle,
-            reuseIdentifier: nil
-        )
+        case .settings:
 
-        cell.backgroundColor = .ypBackgroundDay
+            let cell = UITableViewCell(
+                style: .subtitle,
+                reuseIdentifier: nil
+            )
 
-        switch indexPath.row {
-        case 0:
-            cell.textLabel?.text = "Категория"
-            cell.detailTextLabel?.text = selectedCategory
+            cell.backgroundColor = .ypBackgroundDay
+            
+            cell.separatorInset = UIEdgeInsets(
+                top: 0,
+                left: 16,
+                bottom: 0,
+                right: 16
+            )
+            
+            cell.textLabel?.font = .systemFont(ofSize: 17)
+            cell.textLabel?.textColor = .ypBlackDay
 
-        case 1:
-            guard showsSchedule else {
+            cell.detailTextLabel?.font = .systemFont(ofSize: 17)
+            cell.detailTextLabel?.textColor = .ypGray
+
+            switch indexPath.row {
+            case 0:
+                cell.textLabel?.text = "Категория"
+                cell.detailTextLabel?.text = selectedCategory
+
+            case 1:
+                guard showsSchedule else {
+                    break
+                }
+
+                cell.textLabel?.text = "Расписание"
+
+                if selectedSchedule.count == WeekDay.allCases.count {
+                    cell.detailTextLabel?.text = "Каждый день"
+                } else {
+                    cell.detailTextLabel?.text = WeekDay.allCases
+                        .enumerated()
+                        .filter { selectedSchedule.contains($0.element) }
+                        .map { shortWeekdaySymbols[$0.offset].capitalized }
+                        .joined(separator: ", ")
+                }
+
+            default:
                 break
             }
 
-            cell.textLabel?.text = "Расписание"
+            cell.accessoryType = .disclosureIndicator
 
-            if selectedSchedule.count == WeekDay.allCases.count {
-                cell.detailTextLabel?.text = "Каждый день"
-            } else {
-                cell.detailTextLabel?.text = WeekDay.allCases
-                    .enumerated()
-                    .filter { selectedSchedule.contains($0.element) }
-                    .map { shortWeekdaySymbols[$0.offset].capitalized }
-                    .joined(separator: ", ")
+            return cell
+
+        case .emoji:
+            let cell = CollectionTableViewCell(
+                type: .emoji,
+                reuseIdentifier: nil
+            )
+
+            cell.onEmojiSelected = { [weak self] emoji in
+                self?.selectedEmoji = emoji
+                self?.updateCreateButtonState()
             }
 
-        default:
-            break
+            return cell
+
+        case .color:
+            let cell = CollectionTableViewCell(
+                type: .color,
+                reuseIdentifier: nil
+            )
+
+            cell.onColorSelected = { [weak self] color in
+                self?.selectedColor = color
+                self?.updateCreateButtonState()
+            }
+
+            return cell
         }
 
-        cell.accessoryType = .disclosureIndicator
-
-        return cell
     }
 
     func tableView(
@@ -387,32 +474,37 @@ extension NewTrackerViewController: UITableViewDataSource, UITableViewDelegate {
             animated: true
         )
 
-        guard indexPath.section == 1 else {
+        guard let tableSection = Section(rawValue: indexPath.section) else {
             return
         }
 
-        switch indexPath.row {
-        case 0:
-            break
+        switch tableSection {
+        case .settings:
+            switch indexPath.row {
+            case 0:
+                break
 
-        case 1:
+            case 1:
 
-            guard showsSchedule else {
-                return
+                guard showsSchedule else {
+                    return
+                }
+
+                let viewController = ScheduleViewController(
+                    selectedDays: selectedSchedule
+                )
+
+                viewController.delegate = self
+
+                navigationController?.pushViewController(
+                    viewController,
+                    animated: true
+                )
+
+            default:
+                break
             }
-
-            let viewController = ScheduleViewController(
-                selectedDays: selectedSchedule
-            )
-
-            viewController.delegate = self
-
-            navigationController?.pushViewController(
-                viewController,
-                animated: true
-            )
-
-        default:
+        case .name, .emoji, .color:
             break
         }
     }
@@ -421,18 +513,109 @@ extension NewTrackerViewController: UITableViewDataSource, UITableViewDelegate {
         _ tableView: UITableView,
         viewForFooterInSection section: Int
     ) -> UIView? {
-        guard section == 0 else {
+        guard let tableSection = Section(rawValue: section) else {
             return nil
         }
 
-        return nameLimitLabel
+        switch tableSection {
+        case .name:
+            return nameLimitLabel
+
+        default:
+            return nil
+        }
     }
 
     func tableView(
         _ tableView: UITableView,
         heightForFooterInSection section: Int
     ) -> CGFloat {
-        section == 0 ? isNameOverLimit ? 40 : 8 : 0
+
+        guard let tableSection = Section(rawValue: section) else {
+            return 0
+        }
+
+        switch tableSection {
+        case .name: return isNameOverLimit ? 40 : 8
+        case .settings: return 16
+        case .color, .emoji: return 0
+        }
+    }
+
+    func tableView(
+        _ tableView: UITableView,
+        viewForHeaderInSection section: Int
+    ) -> UIView? {
+
+        guard let tableSection = Section(rawValue: section) else {
+            return nil
+        }
+
+        switch tableSection {
+        case .emoji, .color:
+            let label = UILabel()
+
+            label.text = tableSection == .emoji ? "Emoji" : "Цвет"
+            label.font = .systemFont(ofSize: 19, weight: .bold)
+            label.textColor = .ypBlackDay
+
+            let container = UIView()
+            container.backgroundColor = .ypWhite
+
+            label.translatesAutoresizingMaskIntoConstraints = false
+            container.addSubview(label)
+
+            NSLayoutConstraint.activate([
+                label.leadingAnchor.constraint(
+                    equalTo: container.leadingAnchor,
+                    constant: 16
+                ),
+                label.topAnchor.constraint(
+                    equalTo: container.topAnchor,
+                    constant: 10
+                ),
+            ])
+
+            return container
+
+        case .name, .settings:
+            return nil
+        }
+    }
+    func tableView(
+        _ tableView: UITableView,
+        heightForHeaderInSection section: Int
+    ) -> CGFloat {
+
+        guard let tableSection = Section(rawValue: section) else {
+            return 0
+        }
+
+        switch tableSection {
+        case .emoji, .color:
+            return collectionHeaderHeight
+
+        case .name, .settings:
+            return sectionSpacing
+        }
+    }
+
+    func tableView(
+        _ tableView: UITableView,
+        willSelectRowAt indexPath: IndexPath
+    ) -> IndexPath? {
+
+        guard let section = Section(rawValue: indexPath.section) else {
+            return nil
+        }
+
+        switch section {
+        case .settings:
+            return indexPath
+
+        case .name, .emoji, .color:
+            return nil
+        }
     }
 }
 
