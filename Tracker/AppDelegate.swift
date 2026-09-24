@@ -18,7 +18,10 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
         didFinishLaunchingWithOptions launchOptions:
             [UIApplication.LaunchOptionsKey: Any]?
     ) -> Bool {
-        true
+
+        DaysValueTransformer.register()
+
+        return true
     }
 
     // MARK: UISceneSession Lifecycle
@@ -35,7 +38,6 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
             sessionRole: connectingSceneSession.role
         )
     }
-
 
     // MARK: - Core Data stack
 
@@ -66,6 +68,20 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
         })
         return container
     }()
+    
+    func makeStores() throws -> (
+        tracker: TrackerStore,
+        category: TrackerCategoryStore,
+        record: TrackerRecordStore
+    ) {
+        let context = persistentContainer.viewContext
+
+        return (
+            try TrackerStore(context: context),
+            try TrackerCategoryStore(context: context),
+            try TrackerRecordStore(context: context)
+        )
+    }
 
     // MARK: - Core Data Saving support
 

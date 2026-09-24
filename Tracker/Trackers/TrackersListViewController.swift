@@ -15,6 +15,10 @@ final class TrackersListViewController: UIViewController {
 
     private var completedTrackers: [TrackerRecord] = []
 
+    private var trackerStore: TrackerStore?
+    private var categoryStore: TrackerCategoryStore?
+    private var recordStore: TrackerRecordStore?
+
     // MARK: - UI Elements
 
     private let searchController = UISearchController(
@@ -86,6 +90,7 @@ final class TrackersListViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
+        setupStores()
         setupNavigationBar()
         setupView()
 
@@ -191,6 +196,32 @@ final class TrackersListViewController: UIViewController {
         ])
 
         updateEmptyState()
+    }
+
+    private func setupStores() {
+        guard
+            let appDelegate =
+                UIApplication.shared.delegate as? AppDelegate
+        else {
+            return
+        }
+
+        do {
+            let stores = try appDelegate.makeStores()
+
+            trackerStore = stores.tracker
+            categoryStore = stores.category
+            recordStore = stores.record
+
+            trackerStore?.delegate = self
+            categoryStore?.delegate = self
+            recordStore?.delegate = self
+
+            categories = categoryStore?.categories ?? []
+            completedTrackers = recordStore?.records ?? []
+        } catch {
+            print(error)
+        }
     }
 
     // MARK: - Private Methods
@@ -384,23 +415,21 @@ extension TrackersListViewController: TrackerCollectionViewCellDelegate {
                 && Calendar.current.isDate($0.date, inSameDayAs: selectedDate)
         }
 
-        if isCompleted {
-            completedTrackers = completedTrackers.filter {
-                !($0.id == tracker.id
-                    && Calendar.current.isDate(
-                        $0.date,
-                        inSameDayAs: selectedDate
-                    ))
+        let record = TrackerRecord(
+            id: tracker.id,
+            date: selectedDate
+        )
+
+        do {
+            if isCompleted {
+                try recordStore?.deleteRecord(record)
+            } else {
+                try recordStore?.addRecord(record)
             }
-        } else {
-            let newRecord = TrackerRecord(
-                id: tracker.id,
-                date: selectedDate
-            )
-            completedTrackers = completedTrackers + [newRecord]
+        } catch {
+            print(error)
         }
 
-        collectionView.reloadItems(at: [indexPath])
     }
 
 }
@@ -411,23 +440,22 @@ extension TrackersListViewController: TrackerCreationDelegate {
         _ tracker: Tracker,
         categoryTitle: String
     ) {
-        if let categoryIndex = categories.firstIndex(
-            where: { $0.title == categoryTitle }
-        ) {
-            let category = categories[categoryIndex]
-
-            categories[categoryIndex] = TrackerCategory(
-                title: category.title,
-                trackers: category.trackers + [tracker]
+        do {
+            try trackerStore?.addNewTracker(
+                tracker,
+                categoryTitle: categoryTitle
             )
-        } else {
-            let newCategory = TrackerCategory(
-                title: categoryTitle,
-                trackers: [tracker]
-            )
-
-            categories = categories + [newCategory]
+        } catch {
+            print(error)
         }
+    }
+}
+
+extension TrackersListViewController: StoreDelegate {
+
+    func storeDidUpdate() {
+        categories = categoryStore?.categories ?? []
+        completedTrackers = recordStore?.records ?? []
 
         collectionView.reloadData()
         updateEmptyState()

@@ -15,7 +15,7 @@ struct Tracker {
     let schedule: Set<WeekDay>
 }
 
-enum WeekDay: CaseIterable, Hashable {
+enum WeekDay: CaseIterable, Hashable, Codable {
     case monday
     case tuesday
     case wednesday
