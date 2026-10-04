@@ -37,7 +37,7 @@ class NewTrackerViewController: UIViewController {
 
     private var selectedEmoji: String?
     private var selectedColor: UIColor?
-    private var selectedCategory = "Важное"
+    private var selectedCategory: String?
     private var selectedSchedule: Set<WeekDay>
 
     private let weekdayFormatter: DateFormatter = {
@@ -78,6 +78,8 @@ class NewTrackerViewController: UIViewController {
         let paddingView = UIView(
             frame: CGRect(x: 0, y: 0, width: 16, height: 0)
         )
+
+        textField.clearButtonMode = .whileEditing
         textField.leftView = paddingView
         textField.leftViewMode = .always
         textField.font = .systemFont(ofSize: 17, weight: .regular)
@@ -233,18 +235,69 @@ class NewTrackerViewController: UIViewController {
 
         let isScheduleValid = !selectedSchedule.isEmpty
 
+        let isCategorySelected = selectedCategory != nil
+
         let isEmojiSelected = selectedEmoji != nil
 
         let isColorSelected = selectedColor != nil
 
         let canCreate =
-            isNameValid && isScheduleValid && isEmojiSelected && isColorSelected
+            isNameValid && isScheduleValid && isCategorySelected
+            && isEmojiSelected && isColorSelected
 
         addButton.isEnabled = canCreate
         addButton.backgroundColor =
             canCreate
             ? .ypBlackDay
             : .ypGray
+    }
+
+    private func openCategorySelection() {
+        guard
+            let appDelegate = UIApplication.shared.delegate as? AppDelegate
+        else {
+            return
+        }
+
+        do {
+            let stores = try appDelegate.makeStores()
+
+            let viewModel = TrackerCategoryViewModel(
+                categoryStore: stores.category,
+                selectedCategoryTitle: selectedCategory
+            )
+
+            let viewController = CategoryViewController(
+                viewModel: viewModel
+            )
+
+            viewController.onCategorySelected = { [weak self] title in
+                guard let self else { return }
+
+                self.selectedCategory = title
+
+                self.tableView.reloadRows(
+                    at: [
+                        IndexPath(
+                            row: 0,
+                            section: Section.settings.rawValue
+                        )
+                    ],
+                    with: .none
+                )
+
+                self.updateCreateButtonState()
+            }
+
+            navigationController?.pushViewController(
+                viewController,
+                animated: true
+            )
+        } catch {
+            assertionFailure(
+                "Не удалось создать хранилище категорий: \(error)"
+            )
+        }
     }
 
     @objc private func didChangeHabitName() {
@@ -274,6 +327,7 @@ class NewTrackerViewController: UIViewController {
         guard
             let title = habitNameTextField.text,
             !title.isEmpty,
+            let selectedCategory,
             let selectedEmoji,
             let selectedColor
         else {
@@ -337,7 +391,7 @@ extension NewTrackerViewController: UITableViewDataSource, UITableViewDelegate {
 
         switch section {
         case .emoji, .color:
-            return 200
+            return UITableView.automaticDimension
 
         case .name, .settings:
             return 75
@@ -392,14 +446,14 @@ extension NewTrackerViewController: UITableViewDataSource, UITableViewDelegate {
             )
 
             cell.backgroundColor = .ypBackgroundDay
-            
+
             cell.separatorInset = UIEdgeInsets(
                 top: 0,
                 left: 16,
                 bottom: 0,
                 right: 16
             )
-            
+
             cell.textLabel?.font = .systemFont(ofSize: 17)
             cell.textLabel?.textColor = .ypBlackDay
 
@@ -447,6 +501,17 @@ extension NewTrackerViewController: UITableViewDataSource, UITableViewDelegate {
                 self?.updateCreateButtonState()
             }
 
+            cell.onHeightChanged = { [weak self] in
+                DispatchQueue.main.async {
+                    guard let self else { return }
+
+                    UIView.performWithoutAnimation {
+                        self.tableView.beginUpdates()
+                        self.tableView.endUpdates()
+                    }
+                }
+            }
+
             return cell
 
         case .color:
@@ -458,6 +523,17 @@ extension NewTrackerViewController: UITableViewDataSource, UITableViewDelegate {
             cell.onColorSelected = { [weak self] color in
                 self?.selectedColor = color
                 self?.updateCreateButtonState()
+            }
+
+            cell.onHeightChanged = { [weak self] in
+                DispatchQueue.main.async {
+                    guard let self else { return }
+
+                    UIView.performWithoutAnimation {
+                        self.tableView.beginUpdates()
+                        self.tableView.endUpdates()
+                    }
+                }
             }
 
             return cell
@@ -482,7 +558,7 @@ extension NewTrackerViewController: UITableViewDataSource, UITableViewDelegate {
         case .settings:
             switch indexPath.row {
             case 0:
-                break
+                openCategorySelection()
 
             case 1:
 

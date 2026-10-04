@@ -21,6 +21,10 @@ class CollectionTableViewCell: UITableViewCell {
     var onEmojiSelected: ((String) -> Void)?
     var onColorSelected: ((UIColor) -> Void)?
 
+    private var collectionHeightConstraint: NSLayoutConstraint!
+
+    var onHeightChanged: (() -> Void)?
+
     //MARK: - UI Elements
 
     private let collectionView: UICollectionView = {
@@ -77,23 +81,52 @@ class CollectionTableViewCell: UITableViewCell {
 
         contentView.addSubview(collectionView)
 
+        collectionHeightConstraint =
+            collectionView.heightAnchor.constraint(
+                equalToConstant: 1
+            )
+
         NSLayoutConstraint.activate([
-            //            collectionView.topAnchor.constraint(
-            //                equalTo: contentView.topAnchor
-            //            ),
+            collectionView.topAnchor.constraint(
+                equalTo: contentView.topAnchor
+            ),
             collectionView.leadingAnchor.constraint(
                 equalTo: contentView.leadingAnchor
             ),
             collectionView.trailingAnchor.constraint(
                 equalTo: contentView.trailingAnchor
             ),
-            collectionView.centerYAnchor.constraint(
-                equalTo: contentView.centerYAnchor
+            collectionView.bottomAnchor.constraint(
+                equalTo: contentView.bottomAnchor
             ),
-            collectionView.heightAnchor.constraint(
-                equalToConstant: 156
-            ),
+
+            collectionHeightConstraint,
         ])
+    }
+
+    override func layoutSubviews() {
+        super.layoutSubviews()
+
+        guard collectionView.bounds.width > 0 else {
+            return
+        }
+
+        collectionView.collectionViewLayout.invalidateLayout()
+        collectionView.layoutIfNeeded()
+
+        let height =
+            collectionView.collectionViewLayout
+            .collectionViewContentSize.height
+
+        guard
+            height > 0,
+            abs(collectionHeightConstraint.constant - height) > 0.5
+        else {
+            return
+        }
+
+        collectionHeightConstraint.constant = height
+        onHeightChanged?()
     }
 }
 
@@ -200,10 +233,10 @@ extension CollectionTableViewCell: UICollectionViewDataSource,
         insetForSectionAt section: Int
     ) -> UIEdgeInsets {
         return UIEdgeInsets(
-            top: 0,
-            left: 6,
-            bottom: 0,
-            right: 6
+            top: 24,
+            left: params.leftInset,
+            bottom: 24,
+            right: params.rightInset
         )
     }
 

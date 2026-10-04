@@ -13,16 +13,20 @@ final class TrackerRecordStore: NSObject {
     weak var delegate: StoreDelegate?
 
     var records: [TrackerRecord] {
-        guard
-            let objects = fetchedResultsController.fetchedObjects,
-            let records = try? objects.map({
-                try record(from: $0)
-            })
-        else {
+        guard let objects = fetchedResultsController.fetchedObjects else {
             return []
         }
 
-        return records
+        return objects.compactMap { object in
+            do {
+                return try record(from: object)
+            } catch {
+                assertionFailure(
+                    "Не удалось преобразовать запись: \(error)"
+                )
+                return nil
+            }
+        }
     }
 
     private lazy var fetchedResultsController:

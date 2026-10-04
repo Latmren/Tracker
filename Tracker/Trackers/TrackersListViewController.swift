@@ -18,7 +18,7 @@ final class TrackersListViewController: UIViewController {
     private var trackerStore: TrackerStore?
     private var categoryStore: TrackerCategoryStore?
     private var recordStore: TrackerRecordStore?
-    
+
     private enum SystemImageName: String {
         case plus
     }
@@ -29,23 +29,10 @@ final class TrackersListViewController: UIViewController {
         searchResultsController: nil
     )
 
-    private let emptyStateImageView: UIImageView = {
-        let imageView = UIImageView()
-        imageView.image = UIImage(resource: .emptyTrackers)
-        imageView.contentMode = .scaleAspectFit
-        imageView.translatesAutoresizingMaskIntoConstraints = false
-        return imageView
-    }()
-
-    private let emptyStateLabel: UILabel = {
-        let label = UILabel()
-        label.text = "Что будем отслеживать?"
-        label.font = .systemFont(ofSize: 12, weight: .medium)
-        label.textColor = .ypBlackDay
-        label.textAlignment = .center
-        label.translatesAutoresizingMaskIntoConstraints = false
-        return label
-    }()
+    private let emptyStateView = EmptyStateView(
+        image: UIImage(resource: .emptyTrackers),
+        text: "Что будем отслеживать?"
+    )
 
     private let datePicker: UIDatePicker = {
         let picker = UIDatePicker()
@@ -176,7 +163,7 @@ final class TrackersListViewController: UIViewController {
 
         addButton.tintColor = .ypBlackDay
         navigationItem.leftBarButtonItem = addButton
-        
+
         navigationItem.rightBarButtonItem = UIBarButtonItem(
             customView: datePicker
         )
@@ -193,23 +180,14 @@ final class TrackersListViewController: UIViewController {
     }
 
     private func setupEmptyState() {
-        view.addSubview(emptyStateImageView)
-        view.addSubview(emptyStateLabel)
+        view.addSubview(emptyStateView)
 
         NSLayoutConstraint.activate([
-            emptyStateImageView.centerXAnchor.constraint(
+            emptyStateView.centerXAnchor.constraint(
                 equalTo: view.centerXAnchor
             ),
-            emptyStateImageView.centerYAnchor.constraint(
+            emptyStateView.centerYAnchor.constraint(
                 equalTo: view.centerYAnchor
-            ),
-
-            emptyStateLabel.topAnchor.constraint(
-                equalTo: emptyStateImageView.bottomAnchor,
-                constant: 8
-            ),
-            emptyStateLabel.centerXAnchor.constraint(
-                equalTo: view.centerXAnchor
             ),
         ])
 
@@ -249,8 +227,7 @@ final class TrackersListViewController: UIViewController {
             trackersForSelectedDate(in: $0).isEmpty
         }
 
-        emptyStateImageView.isHidden = !isEmpty
-        emptyStateLabel.isHidden = !isEmpty
+        emptyStateView.isHidden = !isEmpty
         collectionView.isHidden = isEmpty
     }
 
