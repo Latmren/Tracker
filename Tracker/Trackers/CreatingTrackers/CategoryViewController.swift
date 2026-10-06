@@ -206,9 +206,11 @@ extension CategoryViewController: UITableViewDataSource {
             return UITableViewCell()
         }
 
-        let title = viewModel.categoryTitle(
+        guard let title = viewModel.categoryTitle(
             at: indexPath.row
-        )
+        ) else {
+            return cell
+        }
 
         let isSelected = viewModel.isCategorySelected(
             at: indexPath.row

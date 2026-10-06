@@ -25,26 +25,40 @@ final class TrackerCategoryViewModel {
     ) {
         self.categoryStore = categoryStore
         self.selectedCategoryTitle = selectedCategoryTitle
-
-        categoryStore.delegate = self
     }
 
     //MARK: - Public Methods
+
+    private func category(at index: Int) -> TrackerCategory? {
+        let categories = categoryStore.categories
+
+        guard categories.indices.contains(index) else {
+            return nil
+        }
+
+        return categories[index]
+    }
 
     var categoriesCount: Int {
         categoryStore.categories.count
     }
 
-    func categoryTitle(at index: Int) -> String {
-        categoryStore.categories[index].title
+    func categoryTitle(at index: Int) -> String? {
+        category(at: index)?.title
     }
 
     func isCategorySelected(at index: Int) -> Bool {
-        categoryStore.categories[index].title == selectedCategoryTitle
+        guard let category = category(at: index) else {
+            return false
+        }
+
+        return category.title == selectedCategoryTitle
     }
 
     func selectCategory(at index: Int) {
-        let category = categoryStore.categories[index]
+        guard let category = category(at: index) else {
+            return
+        }
 
         selectedCategoryTitle = category.title
         onCategorySelected?(category.title)
@@ -65,7 +79,10 @@ final class TrackerCategoryViewModel {
             in: .whitespacesAndNewlines
         )
 
-        guard isCategoryNameAvailable(normalizedTitle) else {
+        guard
+            !normalizedTitle.isEmpty,
+            isCategoryNameAvailable(normalizedTitle)
+        else {
             return
         }
 
@@ -75,11 +92,7 @@ final class TrackerCategoryViewModel {
         )
 
         try categoryStore.addCategory(category)
-    }
-}
-extension TrackerCategoryViewModel: StoreDelegate {
 
-    func storeDidUpdate() {
         onCategoriesChanged?()
     }
 }

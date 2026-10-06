@@ -95,6 +95,8 @@ final class NewCategoryViewController: UIViewController {
         view.addSubview(nameTextField)
         view.addSubview(doneButton)
 
+        navigationItem.hidesBackButton = true
+
         NSLayoutConstraint.activate([
             nameTextField.topAnchor.constraint(
                 equalTo: view.safeAreaLayoutGuide.topAnchor,

@@ -27,6 +27,8 @@ class NewTrackerViewController: UIViewController {
 
     weak var delegate: TrackerCreationDelegate?
 
+    private let categoryStore: TrackerCategoryStore
+
     private let screenTitle: String
     private let showsSchedule: Bool
 
@@ -57,12 +59,18 @@ class NewTrackerViewController: UIViewController {
         return Array(symbols[1...]) + [symbols[0]]
     }
 
-    init(title: String, showSchedule: Bool, initialSchedule: Set<WeekDay>) {
+    init(
+        title: String,
+        showSchedule: Bool,
+        initialSchedule: Set<WeekDay>,
+        categoryStore: TrackerCategoryStore
+    ) {
         self.screenTitle = title
         self.showsSchedule = showSchedule
         self.selectedSchedule = initialSchedule
-        super.init(nibName: nil, bundle: nil)
+        self.categoryStore = categoryStore
 
+        super.init(nibName: nil, bundle: nil)
     }
 
     @available(*, unavailable)
@@ -228,10 +236,12 @@ class NewTrackerViewController: UIViewController {
     //MARK: - Private functions
 
     private func updateCreateButtonState() {
-        let characterCount = habitNameTextField.text?.count ?? 0
+        let name =
+            habitNameTextField.text?
+            .trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
 
         let isNameValid =
-            characterCount > 0 && characterCount <= maxNameLength
+            !name.isEmpty && name.count <= maxNameLength
 
         let isScheduleValid = !selectedSchedule.isEmpty
 
@@ -253,55 +263,44 @@ class NewTrackerViewController: UIViewController {
     }
 
     private func openCategorySelection() {
-        guard
-            let appDelegate = UIApplication.shared.delegate as? AppDelegate
-        else {
-            return
+        let viewModel = TrackerCategoryViewModel(
+            categoryStore: categoryStore,
+            selectedCategoryTitle: selectedCategory
+        )
+
+        let viewController = CategoryViewController(
+            viewModel: viewModel
+        )
+
+        viewController.onCategorySelected = { [weak self] title in
+            guard let self else { return }
+
+            self.selectedCategory = title
+
+            self.tableView.reloadRows(
+                at: [
+                    IndexPath(
+                        row: 0,
+                        section: Section.settings.rawValue
+                    )
+                ],
+                with: .none
+            )
+
+            self.updateCreateButtonState()
         }
 
-        do {
-            let stores = try appDelegate.makeStores()
-
-            let viewModel = TrackerCategoryViewModel(
-                categoryStore: stores.category,
-                selectedCategoryTitle: selectedCategory
-            )
-
-            let viewController = CategoryViewController(
-                viewModel: viewModel
-            )
-
-            viewController.onCategorySelected = { [weak self] title in
-                guard let self else { return }
-
-                self.selectedCategory = title
-
-                self.tableView.reloadRows(
-                    at: [
-                        IndexPath(
-                            row: 0,
-                            section: Section.settings.rawValue
-                        )
-                    ],
-                    with: .none
-                )
-
-                self.updateCreateButtonState()
-            }
-
-            navigationController?.pushViewController(
-                viewController,
-                animated: true
-            )
-        } catch {
-            assertionFailure(
-                "Не удалось создать хранилище категорий: \(error)"
-            )
-        }
+        navigationController?.pushViewController(
+            viewController,
+            animated: true
+        )
     }
 
     @objc private func didChangeHabitName() {
-        let characterCount = habitNameTextField.text?.count ?? 0
+        let characterCount =
+            habitNameTextField.text?
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+            .count ?? 0
 
         let newIsNameOverLimit = characterCount > maxNameLength
 
@@ -325,7 +324,9 @@ class NewTrackerViewController: UIViewController {
 
     @objc private func didTapAddButton() {
         guard
-            let title = habitNameTextField.text,
+            let title = habitNameTextField.text?.trimmingCharacters(
+                in: .whitespacesAndNewlines
+            ),
             !title.isEmpty,
             let selectedCategory,
             let selectedEmoji,

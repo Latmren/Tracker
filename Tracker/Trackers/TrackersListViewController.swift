@@ -19,6 +19,8 @@ final class TrackersListViewController: UIViewController {
     private var categoryStore: TrackerCategoryStore?
     private var recordStore: TrackerRecordStore?
 
+    private var pendingErrorMessage: String?
+
     private enum SystemImageName: String {
         case plus
     }
@@ -76,6 +78,20 @@ final class TrackersListViewController: UIViewController {
         super.viewWillAppear(animated)
 
         datePicker.maximumDate = Date()
+    }
+
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+
+        guard let pendingErrorMessage else {
+            return
+        }
+
+        self.pendingErrorMessage = nil
+
+        showErrorAlert(
+            message: pendingErrorMessage
+        )
     }
 
     override func viewDidLoad() {
@@ -199,6 +215,8 @@ final class TrackersListViewController: UIViewController {
             let appDelegate =
                 UIApplication.shared.delegate as? AppDelegate
         else {
+            pendingErrorMessage =
+                "Не удалось выполнить настройку приложения"
             return
         }
 
@@ -216,11 +234,22 @@ final class TrackersListViewController: UIViewController {
             categories = categoryStore?.categories ?? []
             completedTrackers = recordStore?.records ?? []
         } catch {
-            print(error)
+            pendingErrorMessage =
+                "Не удалось выполнить настройку приложения"
         }
     }
 
     // MARK: - Private Methods
+
+    private func showErrorAlert(message: String) {
+        let alert = UIAlertController(
+            title: "Что-то пошло не так",
+            message: message,
+            preferredStyle: .alert
+        )
+        alert.addAction(UIAlertAction(title: "ОК", style: .default))
+        present(alert, animated: true)
+    }
 
     private func updateEmptyState() {
         let isEmpty = categories.indices.allSatisfy {
@@ -243,7 +272,13 @@ final class TrackersListViewController: UIViewController {
 
     @objc
     private func didTapAdd() {
-        let addTrackerViewController = AddTrackerViewController()
+        guard let categoryStore else {
+            return
+        }
+
+        let addTrackerViewController = AddTrackerViewController(
+            categoryStore: categoryStore
+        )
 
         addTrackerViewController.delegate = self
 
@@ -422,7 +457,7 @@ extension TrackersListViewController: TrackerCollectionViewCellDelegate {
                 try recordStore?.addRecord(record)
             }
         } catch {
-            print(error)
+            showErrorAlert(message: "Не удалось сохранить выполнение трекера")
         }
 
     }
@@ -441,7 +476,7 @@ extension TrackersListViewController: TrackerCreationDelegate {
                 categoryTitle: categoryTitle
             )
         } catch {
-            print(error)
+            showErrorAlert(message: "Не удалось сохранить создание трекера")
         }
     }
 }

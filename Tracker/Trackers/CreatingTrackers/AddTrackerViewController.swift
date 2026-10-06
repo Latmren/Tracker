@@ -9,9 +9,10 @@ import UIKit
 
 final class AddTrackerViewController: UIViewController {
     //MARK: - Properties
-    
+
     weak var delegate: TrackerCreationDelegate?
-    
+    private let categoryStore: TrackerCategoryStore
+
     //MARK: - UI Elements
 
     private let habitButton: UIButton = {
@@ -35,6 +36,18 @@ final class AddTrackerViewController: UIViewController {
         button.translatesAutoresizingMaskIntoConstraints = false
         return button
     }()
+
+    //MARK: - Initialization
+
+    init(categoryStore: TrackerCategoryStore) {
+        self.categoryStore = categoryStore
+        super.init(nibName: nil, bundle: nil)
+    }
+
+    @available(*, unavailable)
+    required init?(coder: NSCoder) {
+        nil
+    }
 
     //MARK: - Lifecycle
 
@@ -96,20 +109,30 @@ final class AddTrackerViewController: UIViewController {
             for: .touchUpInside
         )
     }
-    
+
     @objc private func didTapHabitButton() {
-        let newHabitViewController = NewHabitViewController()
-        
+        let newHabitViewController = NewHabitViewController(
+            categoryStore: categoryStore
+        )
+
         newHabitViewController.delegate = delegate
-        
-        navigationController?.pushViewController(newHabitViewController, animated: true)
+
+        navigationController?.pushViewController(
+            newHabitViewController,
+            animated: true
+        )
     }
-    
+
     @objc private func didTapIrregularEventButton() {
-        let newIrregularEventViewController = NewIrregularEventViewController()
-        
+        let newIrregularEventViewController = NewIrregularEventViewController(
+            categoryStore: categoryStore
+        )
+
         newIrregularEventViewController.delegate = delegate
-        
-        navigationController?.pushViewController(newIrregularEventViewController, animated: true)
+
+        navigationController?.pushViewController(
+            newIrregularEventViewController,
+            animated: true
+        )
     }
 }
