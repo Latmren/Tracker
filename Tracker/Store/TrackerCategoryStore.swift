@@ -58,6 +58,13 @@ final class TrackerCategoryStore: NSObject {
         try fetchedResultsController.performFetch()
     }
 
+    func addCategory(_ category: TrackerCategory) throws {
+        let categoryCoreData = TrackerCategoryCoreData(context: context)
+        categoryCoreData.title = category.title
+
+        try context.save()
+    }
+
     private func category(
         from categoryCoreData: TrackerCategoryCoreData
     ) throws -> TrackerCategory {

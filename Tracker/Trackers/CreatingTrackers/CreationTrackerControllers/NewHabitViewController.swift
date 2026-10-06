@@ -9,16 +9,13 @@ import UIKit
 
 final class NewHabitViewController: NewTrackerViewController {
 
-    init() {
+    init(categoryStore: TrackerCategoryStore) {
         super.init(
             title: "Новая привычка",
             showSchedule: true,
-            initialSchedule: []
+            initialSchedule: [],
+            categoryStore: categoryStore
         )
     }
 
 }
-
-
-
-

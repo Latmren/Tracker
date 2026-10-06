@@ -18,7 +18,9 @@ final class TrackersListViewController: UIViewController {
     private var trackerStore: TrackerStore?
     private var categoryStore: TrackerCategoryStore?
     private var recordStore: TrackerRecordStore?
-    
+
+    private var pendingErrorMessage: String?
+
     private enum SystemImageName: String {
         case plus
     }
@@ -29,23 +31,10 @@ final class TrackersListViewController: UIViewController {
         searchResultsController: nil
     )
 
-    private let emptyStateImageView: UIImageView = {
-        let imageView = UIImageView()
-        imageView.image = UIImage(resource: .emptyTrackers)
-        imageView.contentMode = .scaleAspectFit
-        imageView.translatesAutoresizingMaskIntoConstraints = false
-        return imageView
-    }()
-
-    private let emptyStateLabel: UILabel = {
-        let label = UILabel()
-        label.text = "Что будем отслеживать?"
-        label.font = .systemFont(ofSize: 12, weight: .medium)
-        label.textColor = .ypBlackDay
-        label.textAlignment = .center
-        label.translatesAutoresizingMaskIntoConstraints = false
-        return label
-    }()
+    private let emptyStateView = EmptyStateView(
+        image: UIImage(resource: .emptyTrackers),
+        text: "Что будем отслеживать?"
+    )
 
     private let datePicker: UIDatePicker = {
         let picker = UIDatePicker()
@@ -89,6 +78,20 @@ final class TrackersListViewController: UIViewController {
         super.viewWillAppear(animated)
 
         datePicker.maximumDate = Date()
+    }
+
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+
+        guard let pendingErrorMessage else {
+            return
+        }
+
+        self.pendingErrorMessage = nil
+
+        showErrorAlert(
+            message: pendingErrorMessage
+        )
     }
 
     override func viewDidLoad() {
@@ -176,7 +179,7 @@ final class TrackersListViewController: UIViewController {
 
         addButton.tintColor = .ypBlackDay
         navigationItem.leftBarButtonItem = addButton
-        
+
         navigationItem.rightBarButtonItem = UIBarButtonItem(
             customView: datePicker
         )
@@ -193,23 +196,14 @@ final class TrackersListViewController: UIViewController {
     }
 
     private func setupEmptyState() {
-        view.addSubview(emptyStateImageView)
-        view.addSubview(emptyStateLabel)
+        view.addSubview(emptyStateView)
 
         NSLayoutConstraint.activate([
-            emptyStateImageView.centerXAnchor.constraint(
+            emptyStateView.centerXAnchor.constraint(
                 equalTo: view.centerXAnchor
             ),
-            emptyStateImageView.centerYAnchor.constraint(
+            emptyStateView.centerYAnchor.constraint(
                 equalTo: view.centerYAnchor
-            ),
-
-            emptyStateLabel.topAnchor.constraint(
-                equalTo: emptyStateImageView.bottomAnchor,
-                constant: 8
-            ),
-            emptyStateLabel.centerXAnchor.constraint(
-                equalTo: view.centerXAnchor
             ),
         ])
 
@@ -221,6 +215,8 @@ final class TrackersListViewController: UIViewController {
             let appDelegate =
                 UIApplication.shared.delegate as? AppDelegate
         else {
+            pendingErrorMessage =
+                "Не удалось выполнить настройку приложения"
             return
         }
 
@@ -238,19 +234,29 @@ final class TrackersListViewController: UIViewController {
             categories = categoryStore?.categories ?? []
             completedTrackers = recordStore?.records ?? []
         } catch {
-            print(error)
+            pendingErrorMessage =
+                "Не удалось выполнить настройку приложения"
         }
     }
 
     // MARK: - Private Methods
+
+    private func showErrorAlert(message: String) {
+        let alert = UIAlertController(
+            title: "Что-то пошло не так",
+            message: message,
+            preferredStyle: .alert
+        )
+        alert.addAction(UIAlertAction(title: "ОК", style: .default))
+        present(alert, animated: true)
+    }
 
     private func updateEmptyState() {
         let isEmpty = categories.indices.allSatisfy {
             trackersForSelectedDate(in: $0).isEmpty
         }
 
-        emptyStateImageView.isHidden = !isEmpty
-        emptyStateLabel.isHidden = !isEmpty
+        emptyStateView.isHidden = !isEmpty
         collectionView.isHidden = isEmpty
     }
 
@@ -266,7 +272,13 @@ final class TrackersListViewController: UIViewController {
 
     @objc
     private func didTapAdd() {
-        let addTrackerViewController = AddTrackerViewController()
+        guard let categoryStore else {
+            return
+        }
+
+        let addTrackerViewController = AddTrackerViewController(
+            categoryStore: categoryStore
+        )
 
         addTrackerViewController.delegate = self
 
@@ -445,7 +457,7 @@ extension TrackersListViewController: TrackerCollectionViewCellDelegate {
                 try recordStore?.addRecord(record)
             }
         } catch {
-            print(error)
+            showErrorAlert(message: "Не удалось сохранить выполнение трекера")
         }
 
     }
@@ -464,7 +476,7 @@ extension TrackersListViewController: TrackerCreationDelegate {
                 categoryTitle: categoryTitle
             )
         } catch {
-            print(error)
+            showErrorAlert(message: "Не удалось сохранить создание трекера")
         }
     }
 }
