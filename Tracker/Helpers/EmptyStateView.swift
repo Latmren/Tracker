@@ -21,7 +21,7 @@ final class EmptyStateView: UIView {
     private let label: UILabel = {
         let label = UILabel()
         label.font = .systemFont(ofSize: 12, weight: .medium)
-        label.textColor = .ypBlackDay
+        label.textColor = .ypBlack
         label.textAlignment = .center
         label.numberOfLines = 0
         label.translatesAutoresizingMaskIntoConstraints = false
@@ -77,5 +77,10 @@ final class EmptyStateView: UIView {
                 equalTo: bottomAnchor
             ),
         ])
+    }
+    
+    func change(to text: String, with image: UIImage) {
+        imageView.image = image
+        label.text = text
     }
 }

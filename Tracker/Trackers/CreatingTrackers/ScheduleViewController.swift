@@ -37,9 +37,9 @@ final class ScheduleViewController: UIViewController {
 
     private let doneButton: UIButton = {
         let button = UIButton(type: .system)
-        button.setTitle("Готово", for: .normal)
+        button.setTitle(String(localized: .readyButton), for: .normal)
         button.setTitleColor(.ypWhite, for: .normal)
-        button.backgroundColor = .ypBlackDay
+        button.backgroundColor = .ypBlack
         button.titleLabel?.font = .systemFont(
             ofSize: 16,
             weight: .medium
@@ -72,7 +72,7 @@ final class ScheduleViewController: UIViewController {
     // MARK: - Setup
     
     private func setupUI() {
-        title = "Расписание"
+        title = String(localized: .scheduleTitle)
         view.backgroundColor = .ypWhite
         
         navigationItem.hidesBackButton = true
@@ -146,11 +146,7 @@ final class ScheduleViewController: UIViewController {
         }
     }
 
-    private let weekdayFormatter: DateFormatter = {
-        let formatter = DateFormatter()
-        formatter.locale = Locale(identifier: "ru_RU")
-        return formatter
-    }()
+    private let weekdayFormatter = DateFormatter()
 
     private var weekdaySymbols: [String] {
         guard let symbols = weekdayFormatter.weekdaySymbols,
@@ -193,9 +189,9 @@ extension ScheduleViewController: UITableViewDataSource, UITableViewDelegate {
             reuseIdentifier: nil
         )
 
-        cell.textLabel?.text = weekdaySymbols[indexPath.row].capitalized
+        cell.textLabel?.text = weekdaySymbols[indexPath.row].localizedCapitalized
 
-        cell.backgroundColor = .ypBackgroundDay
+        cell.backgroundColor = .ypBackground
         cell.selectionStyle = .none
 
         let switchView = UISwitch()

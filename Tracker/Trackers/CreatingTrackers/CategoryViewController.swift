@@ -18,7 +18,7 @@ final class CategoryViewController: UIViewController {
     
     private let emptyStateView = EmptyStateView(
         image: UIImage(resource: .emptyTrackers),
-        text: "Привычки и события можно\nобъединить по смыслу"
+        text: String(localized: .categoryEmptyMessage)
     )
 
     private let tableView: UITableView = {
@@ -35,9 +35,9 @@ final class CategoryViewController: UIViewController {
 
     private let addCategoryButton: UIButton = {
         let button = UIButton(type: .system)
-        button.setTitle("Добавить категорию", for: .normal)
+        button.setTitle(String(localized: .addCategoryButton), for: .normal)
         button.setTitleColor(.ypWhite, for: .normal)
-        button.backgroundColor = .ypBlackDay
+        button.backgroundColor = .ypBlack
         button.titleLabel?.font = .systemFont(
             ofSize: 16,
             weight: .medium
@@ -75,7 +75,7 @@ final class CategoryViewController: UIViewController {
     // MARK: - Setup
 
     private func setupView() {
-        title = "Категория"
+        title = String(localized: .categoryTitle)
         view.backgroundColor = .ypWhite
 
         navigationItem.hidesBackButton = true
@@ -127,6 +127,8 @@ final class CategoryViewController: UIViewController {
     private func setupTableView() {
         tableView.dataSource = self
         tableView.delegate = self
+        
+        tableView.keyboardDismissMode = .interactiveWithAccessory
 
         tableView.register(
             TrackerCategoryTableViewCell.self,

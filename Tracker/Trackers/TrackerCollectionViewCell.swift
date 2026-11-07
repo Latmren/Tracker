@@ -80,7 +80,7 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
             UIImage(systemName: SystemImageName.plus.rawValue),
             for: .normal
         )
-        button.tintColor = .white
+        button.tintColor = .ypWhite
         button.layer.cornerRadius = 17
 
         button.translatesAutoresizingMaskIntoConstraints = false
@@ -116,6 +116,8 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
         emojiBackgroundView.addSubview(emojiLabel)
 
         cardView.addSubview(titleLabel)
+        
+        titleLabel.overrideUserInterfaceStyle = .light
 
         contentView.addSubview(daysLabel)
         contentView.addSubview(completeButton)

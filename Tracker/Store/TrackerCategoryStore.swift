@@ -8,6 +8,9 @@
 import CoreData
 
 final class TrackerCategoryStore: NSObject {
+
+    // MARK: - Properties
+
     private let context: NSManagedObjectContext
     private let mapper = TrackerCoreDataMapper()
     weak var delegate: StoreDelegate?
@@ -51,12 +54,16 @@ final class TrackerCategoryStore: NSObject {
             return controller
         }()
 
+    // MARK: - Initialization
+
     init(context: NSManagedObjectContext) throws {
         self.context = context
         super.init()
 
         try fetchedResultsController.performFetch()
     }
+
+    // MARK: - CRUD Operations
 
     func addCategory(_ category: TrackerCategory) throws {
         let categoryCoreData = TrackerCategoryCoreData(context: context)
@@ -95,8 +102,9 @@ final class TrackerCategoryStore: NSObject {
 
 }
 
-extension TrackerCategoryStore: NSFetchedResultsControllerDelegate {
+// MARK: - NSFetchedResultsControllerDelegate
 
+extension TrackerCategoryStore: NSFetchedResultsControllerDelegate {
     func controllerDidChangeContent(
         _ controller:
             NSFetchedResultsController<NSFetchRequestResult>

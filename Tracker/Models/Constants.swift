@@ -37,7 +37,7 @@ let colors: [UIColor] = [
 
 let params = GeometricParams(
     cellCount: 6,
-    leftInset: 10,
-    rightInset: 10,
+    leftInset: 2,
+    rightInset: 2,
     cellSpacing: 5
 )

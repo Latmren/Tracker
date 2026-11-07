@@ -67,6 +67,8 @@ class CollectionTableViewCell: UITableViewCell {
         collectionView.dataSource = self
         collectionView.delegate = self
 
+        collectionView.backgroundColor = .ypWhite
+
         collectionView.allowsMultipleSelection = false
 
         collectionView.register(
@@ -107,26 +109,63 @@ class CollectionTableViewCell: UITableViewCell {
     override func layoutSubviews() {
         super.layoutSubviews()
 
-        guard collectionView.bounds.width > 0 else {
+        guard contentView.bounds.width > params.paddingWidth else {
             return
         }
 
-        collectionView.collectionViewLayout.invalidateLayout()
-        collectionView.layoutIfNeeded()
+        let itemWidth =
+            (contentView.bounds.width - params.paddingWidth)
+            / CGFloat(params.cellCount)
 
-        let height =
-            collectionView.collectionViewLayout
-            .collectionViewContentSize.height
+        let itemCount = type == .emoji ? emojis.count : colors.count
+        let rows = (itemCount + params.cellCount - 1) / params.cellCount
 
-        guard
-            height > 0,
-            abs(collectionHeightConstraint.constant - height) > 0.5
-        else {
+        let height = CGFloat(rows) * itemWidth + 48
+
+        guard abs(collectionHeightConstraint.constant - height) > 0.5 else {
             return
         }
 
         collectionHeightConstraint.constant = height
         onHeightChanged?()
+    }
+
+    // MARK: - Private Methods
+
+    func selectEmoji(_ emoji: String?) {
+        guard let emoji,
+            let index = emojis.firstIndex(of: emoji)
+        else {
+            return
+        }
+
+        let indexPath = IndexPath(item: index, section: 0)
+
+        collectionView.selectItem(
+            at: indexPath,
+            animated: false,
+            scrollPosition: []
+        )
+    }
+
+    func selectColor(_ color: UIColor?) {
+        guard let color else { return }
+
+        let traits = UITraitCollection(userInterfaceStyle: .light)
+
+        let resolvedColor = color.resolvedColor(with: traits)
+
+        let index = colors.firstIndex {
+            $0.resolvedColor(with: traits).isEqual(resolvedColor)
+        }
+
+        guard let index else { return }
+
+        collectionView.selectItem(
+            at: IndexPath(item: index, section: 0),
+            animated: false,
+            scrollPosition: []
+        )
     }
 }
 

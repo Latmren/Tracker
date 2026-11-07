@@ -26,10 +26,10 @@ final class TrackerCategoryTableViewCell: UITableViewCell {
     }
 
     private func setupView() {
-        backgroundColor = .ypBackgroundDay
+        backgroundColor = .ypBackground
 
         textLabel?.font = .systemFont(ofSize: 17)
-        textLabel?.textColor = .ypBlackDay
+        textLabel?.textColor = .ypBlack
 
         selectionStyle = .none
 

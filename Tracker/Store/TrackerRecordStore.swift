@@ -9,6 +9,9 @@ import CoreData
 import Foundation
 
 final class TrackerRecordStore: NSObject {
+
+    // MARK: - Properties
+
     private let context: NSManagedObjectContext
     weak var delegate: StoreDelegate?
 
@@ -52,12 +55,16 @@ final class TrackerRecordStore: NSObject {
             return controller
         }()
 
+    // MARK: - Initialization
+
     init(context: NSManagedObjectContext) throws {
         self.context = context
         super.init()
 
         try fetchedResultsController.performFetch()
     }
+
+    // MARK: - CRUD Operations
 
     private func record(
         from recordCoreData: TrackerRecordCoreData
@@ -125,10 +132,11 @@ final class TrackerRecordStore: NSObject {
     }
 }
 
+// MARK: - NSFetchedResultsControllerDelegate
+
 extension TrackerRecordStore:
     NSFetchedResultsControllerDelegate
 {
-
     func controllerDidChangeContent(
         _ controller:
             NSFetchedResultsController<NSFetchRequestResult>

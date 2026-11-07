@@ -64,25 +64,29 @@ final class TrackerCategoryViewModel {
         onCategorySelected?(category.title)
     }
 
-    func isCategoryNameAvailable(_ title: String) -> Bool {
-        let normalizedTitle = title.trimmingCharacters(
+    func isCategoryNameValid(_ name: String) -> Bool {
+        validatedCategoryTitle(name) != nil
+    }
+
+    private func validatedCategoryTitle(_ title: String) -> String? {
+        let trimmedTitle = title.trimmingCharacters(
             in: .whitespacesAndNewlines
         )
 
-        return !categoryStore.categories.contains {
-            $0.title.caseInsensitiveCompare(normalizedTitle) == .orderedSame
+        guard !trimmedTitle.isEmpty,
+            !categoryStore.categories.contains(where: {
+                $0.title.caseInsensitiveCompare(trimmedTitle) == .orderedSame
+            })
+        else {
+            return nil
         }
+
+        return trimmedTitle
     }
 
     func addCategory(title: String) throws {
-        let normalizedTitle = title.trimmingCharacters(
-            in: .whitespacesAndNewlines
-        )
 
-        guard
-            !normalizedTitle.isEmpty,
-            isCategoryNameAvailable(normalizedTitle)
-        else {
+        guard let normalizedTitle = validatedCategoryTitle(title) else {
             return
         }
 

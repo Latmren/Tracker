@@ -18,10 +18,10 @@ final class NewCategoryViewController: UIViewController {
     private let nameTextField: UITextField = {
         let textField = UITextField()
 
-        textField.placeholder = "Введите название категории"
+        textField.placeholder = String(localized: .newCategoryNamePlaceholder)
         textField.font = .systemFont(ofSize: 17)
-        textField.textColor = .ypBlackDay
-        textField.backgroundColor = .ypBackgroundDay
+        textField.textColor = .ypBlack
+        textField.backgroundColor = .ypBackground
 
         textField.layer.cornerRadius = 16
         textField.clearButtonMode = .whileEditing
@@ -37,6 +37,7 @@ final class NewCategoryViewController: UIViewController {
 
         textField.leftView = paddingView
         textField.leftViewMode = .always
+        textField.returnKeyType = .done
 
         textField.translatesAutoresizingMaskIntoConstraints = false
         return textField
@@ -45,7 +46,7 @@ final class NewCategoryViewController: UIViewController {
     private let doneButton: UIButton = {
         let button = UIButton(type: .system)
 
-        button.setTitle("Готово", for: .normal)
+        button.setTitle(String(localized: .readyButton), for: .normal)
         button.setTitleColor(.ypWhite, for: .normal)
 
         button.titleLabel?.font = .systemFont(
@@ -89,7 +90,7 @@ final class NewCategoryViewController: UIViewController {
     // MARK: - Setup
 
     private func setupView() {
-        title = "Новая категория"
+        title = String(localized: .newCategoryTitle)
         view.backgroundColor = .ypWhite
 
         view.addSubview(nameTextField)
@@ -133,6 +134,15 @@ final class NewCategoryViewController: UIViewController {
     }
 
     private func setupActions() {
+        
+        let tapGesture = UITapGestureRecognizer(
+            target: self,
+            action: #selector(dismissKeyboard)
+        )
+
+        tapGesture.cancelsTouchesInView = false
+        view.addGestureRecognizer(tapGesture)
+        
         nameTextField.addTarget(
             self,
             action: #selector(nameTextFieldChanged),
@@ -144,35 +154,33 @@ final class NewCategoryViewController: UIViewController {
             action: #selector(didTapDoneButton),
             for: .touchUpInside
         )
+        
+        nameTextField.addTarget(
+            self,
+            action: #selector(didPressReturn),
+            for: .editingDidEndOnExit
+        )
     }
 
     // MARK: - Actions
 
     @objc
     private func nameTextFieldChanged() {
-        let text = nameTextField.text ?? ""
-
-        let trimmedText = text.trimmingCharacters(
-            in: .whitespacesAndNewlines
+        
+        let isValid = viewModel.isCategoryNameValid(
+            nameTextField.text ?? ""
         )
-
-        let isValid =
-            !trimmedText.isEmpty
-            && viewModel.isCategoryNameAvailable(trimmedText)
 
         doneButton.isEnabled = isValid
         doneButton.backgroundColor =
-            isValid ? .ypBlackDay : .ypGray
+            isValid ? .ypBlack : .ypGray
     }
 
     @objc
     private func didTapDoneButton() {
         guard
-            let text = nameTextField.text?
-                .trimmingCharacters(
-                    in: .whitespacesAndNewlines
-                ),
-            !text.isEmpty
+            let text = nameTextField.text,
+            viewModel.isCategoryNameValid(text)
         else {
             return
         }
@@ -184,9 +192,37 @@ final class NewCategoryViewController: UIViewController {
                 animated: true
             )
         } catch {
-            assertionFailure(
-                "Не удалось создать категорию: \(error)"
+            showErrorAlert(
+                message: String(localized: .categoryCreationSaveError)
             )
         }
+    }
+    
+    @objc
+    private func dismissKeyboard(_ gesture: UITapGestureRecognizer) {
+        let location = gesture.location(in: view)
+
+        guard !nameTextField.frame.contains(location) else {
+            return
+        }
+
+        nameTextField.resignFirstResponder()
+    }
+    
+    @objc
+    private func didPressReturn() {
+        nameTextField.resignFirstResponder()
+    }
+    
+    private func showErrorAlert(message: String) {
+        let alert = UIAlertController(
+            title: String(localized: .genericErrorTitle),
+            message: message,
+            preferredStyle: .alert
+        )
+        alert.addAction(
+            UIAlertAction(title: String(localized: .okButton), style: .default)
+        )
+        present(alert, animated: true)
     }
 }

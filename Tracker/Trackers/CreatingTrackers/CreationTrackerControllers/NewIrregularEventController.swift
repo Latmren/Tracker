@@ -10,11 +10,16 @@ import UIKit
 final class NewIrregularEventViewController: NewTrackerViewController {
 
     init(categoryStore: TrackerCategoryStore) {
+        
+        let viewModel = NewTrackerViewModel(
+            initialSchedule: Set(WeekDay.allCases)
+        )
+        
         super.init(
-            title: "Новое нерегулярное событие",
+            title: String(localized: .newIrregularEventTitle),
             showSchedule: false,
-            initialSchedule: Set(WeekDay.allCases),
-            categoryStore: categoryStore
+            categoryStore: categoryStore,
+            newTrackerViewModel: viewModel
         )
     }
 
