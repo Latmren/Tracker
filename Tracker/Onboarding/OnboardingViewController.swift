@@ -9,14 +9,16 @@ import UIKit
 
 final class OnboardingViewController: UIPageViewController {
 
+    // MARK: - Properties
+
     private lazy var onboardPages: [OnboardPageViewController] = [
         OnboardPageViewController(
             backgroundImage: .background1,
-            titleText: "Отслеживайте только\nто, что хотите"
+            titleText: String(localized: .onboardingFirstTitle)
         ),
         OnboardPageViewController(
             backgroundImage: .background2,
-            titleText: "Даже если это\nне литры воды и йога"
+            titleText: String(localized: .onboardingSecondTitle)
         ),
     ]
 
@@ -25,8 +27,8 @@ final class OnboardingViewController: UIPageViewController {
         pageControl.numberOfPages = onboardPages.count
         pageControl.currentPage = 0
 
-        pageControl.currentPageIndicatorTintColor = .ypBlackDay
-        pageControl.pageIndicatorTintColor = .ypBlackDay.withAlphaComponent(0.3)
+        pageControl.currentPageIndicatorTintColor = .ypBlack
+        pageControl.pageIndicatorTintColor = .ypBlack.withAlphaComponent(0.3)
 
         pageControl.translatesAutoresizingMaskIntoConstraints = false
         return pageControl
@@ -34,9 +36,13 @@ final class OnboardingViewController: UIPageViewController {
 
     private lazy var continueButton: UIButton = {
         let button = UIButton()
-        button.setTitle("Вот это технологии!", for: .normal)
-        button.setTitleColor(.white, for: .normal)
-        button.backgroundColor = .ypBlackDay
+        button.setTitle(
+            String(localized: .onboardingContinueButton),
+            for: .normal
+        )
+        button.titleLabel?.font = .systemFont(ofSize: 16, weight: .medium)
+        button.setTitleColor(.ypWhite, for: .normal)
+        button.backgroundColor = .ypBlack
         button.layer.cornerRadius = 16
         button.addTarget(
             self,
@@ -46,6 +52,8 @@ final class OnboardingViewController: UIPageViewController {
         button.translatesAutoresizingMaskIntoConstraints = false
         return button
     }()
+
+    // MARK: - Initialization
 
     init() {
         super.init(
@@ -59,6 +67,8 @@ final class OnboardingViewController: UIPageViewController {
     required init?(coder: NSCoder) {
         nil
     }
+
+    // MARK: - Lifecycle
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -77,6 +87,8 @@ final class OnboardingViewController: UIPageViewController {
 
         view.addSubview(pageControl)
         view.addSubview(continueButton)
+
+        continueButton.overrideUserInterfaceStyle = .light
 
         NSLayoutConstraint.activate([
             continueButton.leadingAnchor.constraint(
@@ -101,6 +113,8 @@ final class OnboardingViewController: UIPageViewController {
         ])
     }
 
+    // MARK: - Actions
+
     @objc
     private func continueButtonTapped() {
         UserDefaults.standard.set(true, forKey: "hasSeenOnboarding")
@@ -117,6 +131,8 @@ final class OnboardingViewController: UIPageViewController {
     }
 
 }
+
+// MARK: - UIPageViewControllerDataSource
 
 extension OnboardingViewController: UIPageViewControllerDataSource {
     func pageViewController(
@@ -162,6 +178,9 @@ extension OnboardingViewController: UIPageViewControllerDataSource {
     }
 
 }
+
+// MARK: - UIPageViewControllerDelegate
+
 extension OnboardingViewController: UIPageViewControllerDelegate {
     func pageViewController(
         _ pageViewController: UIPageViewController,
@@ -172,7 +191,9 @@ extension OnboardingViewController: UIPageViewControllerDelegate {
 
         if let currentViewController = pageViewController.viewControllers?
             .first as? OnboardPageViewController,
-            let currentIndex = onboardPages.firstIndex(of: currentViewController)
+            let currentIndex = onboardPages.firstIndex(
+                of: currentViewController
+            )
         {
             pageControl.currentPage = currentIndex
         }

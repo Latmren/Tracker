@@ -8,6 +8,9 @@
 import UIKit
 
 final class OnboardPageViewController: UIViewController {
+    
+    // MARK: - Properties
+    
     private let backgroundImage: UIImage
     private let titleText: String
 
@@ -28,6 +31,8 @@ final class OnboardPageViewController: UIViewController {
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
+    
+    // MARK: - Initialization
 
     init(backgroundImage: UIImage, titleText: String) {
         self.backgroundImage = backgroundImage
@@ -39,6 +44,8 @@ final class OnboardPageViewController: UIViewController {
     required init?(coder: NSCoder) {
         nil
     }
+    
+    // MARK: - Lifecycle
 
     override func viewDidLoad() {
         super.viewDidLoad()

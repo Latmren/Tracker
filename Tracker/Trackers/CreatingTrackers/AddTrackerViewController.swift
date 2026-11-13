@@ -10,17 +10,17 @@ import UIKit
 final class AddTrackerViewController: UIViewController {
     //MARK: - Properties
 
-    weak var delegate: TrackerCreationDelegate?
+    weak var delegate: TrackerFormDelegate?
     private let categoryStore: TrackerCategoryStore
 
     //MARK: - UI Elements
 
     private let habitButton: UIButton = {
         let button = UIButton()
-        button.setTitle("Привычка", for: .normal)
+        button.setTitle(String(localized: .habitTitle), for: .normal)
         button.setTitleColor(.ypWhite, for: .normal)
         button.titleLabel?.font = .systemFont(ofSize: 16, weight: .medium)
-        button.backgroundColor = .ypBlackDay
+        button.backgroundColor = .ypBlack
         button.layer.cornerRadius = 16
         button.translatesAutoresizingMaskIntoConstraints = false
         return button
@@ -28,10 +28,10 @@ final class AddTrackerViewController: UIViewController {
 
     private let irregularEventButton: UIButton = {
         let button = UIButton()
-        button.setTitle("Нерегулярное событие", for: .normal)
+        button.setTitle(String(localized: .irregularEventTitle), for: .normal)
         button.setTitleColor(.ypWhite, for: .normal)
         button.titleLabel?.font = .systemFont(ofSize: 16, weight: .medium)
-        button.backgroundColor = .ypBlackDay
+        button.backgroundColor = .ypBlack
         button.layer.cornerRadius = 16
         button.translatesAutoresizingMaskIntoConstraints = false
         return button
@@ -62,7 +62,7 @@ final class AddTrackerViewController: UIViewController {
 
     private func setupView() {
         view.backgroundColor = .ypWhite
-        title = "Создание трекера"
+        title = String(localized: .creatingTrackerTitle)
 
         view.addSubview(habitButton)
         view.addSubview(irregularEventButton)

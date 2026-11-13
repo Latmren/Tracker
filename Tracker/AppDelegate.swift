@@ -6,6 +6,7 @@
 //
 
 import CoreData
+import Logging
 import UIKit
 
 @main
@@ -19,7 +20,34 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
             [UIApplication.LaunchOptionsKey: Any]?
     ) -> Bool {
 
+        // MARK: - Logging Configuration
+
+        LoggingSystem.bootstrap { label in
+            var handler = StreamLogHandler.standardOutput(
+                label: label
+            )
+
+            #if DEBUG
+                handler.logLevel = .debug
+            #else
+                handler.logLevel = .warning
+            #endif
+
+            return handler
+        }
+
+        // MARK: - Value Transformers
+
         DaysValueTransformer.register()
+
+        ValueTransformer.setValueTransformer(
+            UIColorValueTransformer(),
+            forName: NSValueTransformerName("UIColorValueTransformer")
+        )
+
+        // MARK: - Analytics
+
+        AnalyticsService.activate()
 
         return true
     }
@@ -42,30 +70,31 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
     // MARK: - Core Data stack
 
     lazy var persistentContainer: NSPersistentContainer = {
-        /*
-         The persistent container for the application. This implementation
-         creates and returns a container, having loaded the store for the
-         application to it. This property is optional since there are legitimate
-         error conditions that could cause the creation of the store to fail.
-        */
         let container = NSPersistentContainer(name: "Tracker")
         container.loadPersistentStores(completionHandler: {
             (storeDescription, error) in
             if let error = error as NSError? {
-                // Replace this implementation with code to handle the error appropriately.
-                // fatalError() causes the application to generate a crash log and terminate. You should not use this function in a shipping application, although it may be useful during development.
-
-                /*
-                 Typical reasons for an error here include:
-                 * The parent directory does not exist, cannot be created, or disallows writing.
-                 * The persistent store is not accessible, due to permissions or data protection when the device is locked.
-                 * The device is out of space.
-                 * The store could not be migrated to the current model version.
-                 Check the error message to determine what the actual problem was.
-                 */
                 fatalError("Unresolved error \(error), \(error.userInfo)")
             }
         })
+        return container
+    }()
+
+    lazy var testPersistentContainer: NSPersistentContainer = {
+        let container = NSPersistentContainer(name: "Tracker")
+
+        let description = NSPersistentStoreDescription()
+        description.type = NSInMemoryStoreType
+        description.shouldAddStoreAsynchronously = false
+
+        container.persistentStoreDescriptions = [description]
+
+        container.loadPersistentStores { _, error in
+            if let error {
+                assertionFailure("Failed to load test store: \(error)")
+            }
+        }
+
         return container
     }()
 
@@ -83,9 +112,42 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
         )
     }
 
+    func makeInMemoryStores() throws -> (
+        tracker: TrackerStore,
+        category: TrackerCategoryStore,
+        record: TrackerRecordStore
+    ) {
+        let context = testPersistentContainer.viewContext
+
+        return (
+            try TrackerStore(context: context),
+            try TrackerCategoryStore(context: context),
+            try TrackerRecordStore(context: context)
+        )
+    }
+
+    func makeRecordStore() throws -> TrackerRecordStore {
+        try TrackerRecordStore(
+            context: persistentContainer.viewContext
+        )
+    }
+
+    func makeCategoryStore() throws -> TrackerCategoryStore {
+        try TrackerCategoryStore(
+            context: persistentContainer.viewContext
+        )
+    }
+
+    func makeTrackerStore() throws -> TrackerStore {
+        try TrackerStore(
+            context: persistentContainer.viewContext
+        )
+    }
+
     // MARK: - Core Data Saving support
 
     func saveContext() {
+
         let context = persistentContainer.viewContext
         if context.hasChanges {
             do {

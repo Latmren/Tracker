@@ -10,11 +10,16 @@ import UIKit
 final class NewHabitViewController: NewTrackerViewController {
 
     init(categoryStore: TrackerCategoryStore) {
+
+        let viewModel = NewTrackerViewModel(
+            initialSchedule: []
+        )
+
         super.init(
-            title: "Новая привычка",
+            title: String(localized: .newHabitTitle),
             showSchedule: true,
-            initialSchedule: [],
-            categoryStore: categoryStore
+            categoryStore: categoryStore,
+            newTrackerViewModel: viewModel
         )
     }
 
