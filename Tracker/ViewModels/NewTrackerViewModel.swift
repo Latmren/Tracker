@@ -5,7 +5,6 @@
 //  Created by Dmitry Zherebyatnikov on 03.11.2026.
 //
 
-import Foundation
 import UIKit
 
 final class NewTrackerViewModel {
@@ -14,8 +13,8 @@ final class NewTrackerViewModel {
 
     private let editingTrackerID: UUID?
 
-    private(set) var selectedEmoji: String? = nil
-    private(set) var selectedColor: UIColor? = nil
+    private(set) var selectedEmoji: String?
+    private(set) var selectedColor: UIColor?
     private(set) var selectedCategory: String? = nil
     private(set) var selectedSchedule: Set<WeekDay> = []
 

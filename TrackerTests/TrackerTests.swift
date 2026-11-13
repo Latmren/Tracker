@@ -10,7 +10,7 @@ import XCTest
 
 @testable import Tracker
 
-final class TrackerTests: XCTestCase {
+final class TrackersViewControllerSnapshotTests: XCTestCase {
 
     private func makeMainScreen() throws -> TrackersListViewController {
         let appDelegate = try XCTUnwrap(

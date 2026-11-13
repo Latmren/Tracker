@@ -6,6 +6,7 @@
 //
 
 import CoreData
+import Logging
 import UIKit
 
 @main
@@ -19,13 +20,33 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
             [UIApplication.LaunchOptionsKey: Any]?
     ) -> Bool {
 
+        // MARK: - Logging Configuration
+
+        LoggingSystem.bootstrap { label in
+            var handler = StreamLogHandler.standardOutput(
+                label: label
+            )
+
+            #if DEBUG
+                handler.logLevel = .debug
+            #else
+                handler.logLevel = .warning
+            #endif
+
+            return handler
+        }
+
+        // MARK: - Value Transformers
+
         DaysValueTransformer.register()
-        
+
         ValueTransformer.setValueTransformer(
             UIColorValueTransformer(),
             forName: NSValueTransformerName("UIColorValueTransformer")
         )
-        
+
+        // MARK: - Analytics
+
         AnalyticsService.activate()
 
         return true
@@ -48,19 +69,17 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
 
     // MARK: - Core Data stack
 
-    
     lazy var persistentContainer: NSPersistentContainer = {
         let container = NSPersistentContainer(name: "Tracker")
         container.loadPersistentStores(completionHandler: {
             (storeDescription, error) in
             if let error = error as NSError? {
-
                 fatalError("Unresolved error \(error), \(error.userInfo)")
             }
         })
         return container
     }()
-    
+
     lazy var testPersistentContainer: NSPersistentContainer = {
         let container = NSPersistentContainer(name: "Tracker")
 
@@ -72,7 +91,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
 
         container.loadPersistentStores { _, error in
             if let error {
-                fatalError("Failed to load test store: \(error)")
+                assertionFailure("Failed to load test store: \(error)")
             }
         }
 
@@ -92,7 +111,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
             try TrackerRecordStore(context: context)
         )
     }
-    
+
     func makeInMemoryStores() throws -> (
         tracker: TrackerStore,
         category: TrackerCategoryStore,
@@ -128,7 +147,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
     // MARK: - Core Data Saving support
 
     func saveContext() {
-        
+
         let context = persistentContainer.viewContext
         if context.hasChanges {
             do {

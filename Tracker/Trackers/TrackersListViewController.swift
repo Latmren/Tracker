@@ -10,7 +10,6 @@ import UIKit
 final class TrackersListViewController: UIViewController {
 
     // MARK: - Properties
-    private let analyticsService = AnalyticsService()
 
     private let trackersListViewModel: TrackersListViewModel
 
@@ -121,13 +120,19 @@ final class TrackersListViewController: UIViewController {
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
 
-        analyticsService.report(event: "open", params: ["screen": "Main"])
+        AnalyticsService.report(
+            event: .open,
+            screen: .main
+        )
     }
 
     override func viewDidDisappear(_ animated: Bool) {
         super.viewDidDisappear(animated)
 
-        analyticsService.report(event: "close", params: ["screen": "Main"])
+        AnalyticsService.report(
+            event: .close,
+            screen: .main
+        )
     }
 
     // MARK: - Setup
@@ -405,12 +410,10 @@ final class TrackersListViewController: UIViewController {
 
         present(navigationController, animated: true)
 
-        analyticsService.report(
-            event: "click",
-            params: [
-                "screen": "Main",
-                "item": "add_track",
-            ]
+        AnalyticsService.report(
+            event: .click,
+            screen: .main,
+            item: .addTrack,
         )
     }
 
@@ -433,12 +436,10 @@ final class TrackersListViewController: UIViewController {
 
         present(navigationController, animated: true)
 
-        analyticsService.report(
-            event: "click",
-            params: [
-                "screen": "Main",
-                "item": "filter",
-            ]
+        AnalyticsService.report(
+            event: .click,
+            screen: .main,
+            item: .filter
         )
     }
 }
@@ -591,12 +592,10 @@ extension TrackersListViewController: UICollectionViewDelegateFlowLayout {
                         categoryTitle: category.title
                     )
 
-                    self?.analyticsService.report(
-                        event: "click",
-                        params: [
-                            "screen": "Main",
-                            "item": "edit",
-                        ]
+                    AnalyticsService.report(
+                        event: .click,
+                        screen: .main,
+                        item: .edit
                     )
                 },
                 UIAction(
@@ -607,12 +606,10 @@ extension TrackersListViewController: UICollectionViewDelegateFlowLayout {
                     [weak self] _ in
                     self?.deletionConfirmationAlert(of: tracker)
 
-                    self?.analyticsService.report(
-                        event: "click",
-                        params: [
-                            "screen": "Main",
-                            "item": "delete",
-                        ]
+                    AnalyticsService.report(
+                        event: .click,
+                        screen: .main,
+                        item: .delete,
                     )
                 },
             ])
@@ -626,13 +623,11 @@ extension TrackersListViewController: TrackerCollectionViewCellDelegate {
         guard let indexPath = collectionView.indexPath(for: cell) else {
             return
         }
-        
-        analyticsService.report(
-            event: "click",
-            params: [
-                "screen": "Main",
-                "item": "track",
-            ]
+
+        AnalyticsService.report(
+            event: .click,
+            screen: .main,
+            item: .track,
         )
 
         let trackers = trackersListViewModel.visibleCategories[

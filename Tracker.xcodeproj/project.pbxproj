@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		1B3C01C830A50F8C00C0E03D /* Logging in Frameworks */ = {isa = PBXBuildFile; productRef = 1B3C01C730A50F8C00C0E03D /* Logging */; };
 		1B6D44F2309F6840004FB00D /* AppMetricaCore in Frameworks */ = {isa = PBXBuildFile; productRef = 1B6D44F1309F6840004FB00D /* AppMetricaCore */; };
 		1B6D44F4309F6840004FB00D /* AppMetricaCrashes in Frameworks */ = {isa = PBXBuildFile; productRef = 1B6D44F3309F6840004FB00D /* AppMetricaCrashes */; };
 		1B6D4561309FD8F5004FB00D /* SnapshotTesting in Frameworks */ = {isa = PBXBuildFile; productRef = 1B6D4560309FD8F5004FB00D /* SnapshotTesting */; };
@@ -71,6 +72,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1B3C01C830A50F8C00C0E03D /* Logging in Frameworks */,
 				1B6D44F4309F6840004FB00D /* AppMetricaCrashes in Frameworks */,
 				1B6D44F2309F6840004FB00D /* AppMetricaCore in Frameworks */,
 			);
@@ -136,6 +138,7 @@
 			packageProductDependencies = (
 				1B6D44F1309F6840004FB00D /* AppMetricaCore */,
 				1B6D44F3309F6840004FB00D /* AppMetricaCrashes */,
+				1B3C01C730A50F8C00C0E03D /* Logging */,
 			);
 			productName = Tracker;
 			productReference = 1B243AB73036564E00612604 /* Tracker.app */;
@@ -225,6 +228,7 @@
 			packageReferences = (
 				1B6D44F0309F6840004FB00D /* XCRemoteSwiftPackageReference "appmetrica-sdk-ios" */,
 				1B6D455F309FD8F5004FB00D /* XCRemoteSwiftPackageReference "swift-snapshot-testing" */,
+				1B3C01C630A50F8C00C0E03D /* XCRemoteSwiftPackageReference "swift-log" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 1B243AB83036564E00612604 /* Products */;
@@ -302,6 +306,8 @@
 /* Begin XCBuildConfiguration section */
 		1B243AE43036564F00612604 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReferenceAnchor = 1B243AB93036564E00612604 /* Tracker */;
+			baseConfigurationReferenceRelativePath = Config/AppConfig.xcconfig;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -334,6 +340,8 @@
 		};
 		1B243AE53036564F00612604 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReferenceAnchor = 1B243AB93036564E00612604 /* Tracker */;
+			baseConfigurationReferenceRelativePath = Config/AppConfig.xcconfig;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -613,6 +621,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		1B3C01C630A50F8C00C0E03D /* XCRemoteSwiftPackageReference "swift-log" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/apple/swift-log.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.16.2;
+			};
+		};
 		1B6D44F0309F6840004FB00D /* XCRemoteSwiftPackageReference "appmetrica-sdk-ios" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/appmetrica/appmetrica-sdk-ios";
@@ -632,6 +648,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		1B3C01C730A50F8C00C0E03D /* Logging */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 1B3C01C630A50F8C00C0E03D /* XCRemoteSwiftPackageReference "swift-log" */;
+			productName = Logging;
+		};
 		1B6D44F1309F6840004FB00D /* AppMetricaCore */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 1B6D44F0309F6840004FB00D /* XCRemoteSwiftPackageReference "appmetrica-sdk-ios" */;
